@@ -163,6 +163,11 @@ return [
         Illuminate\View\ViewServiceProvider::class,
 
         /*
+         * Laravel Fortify
+         */
+        App\Providers\FortifyServiceProvider::class,
+
+        /*
          * Package Service Providers...
          */
 
