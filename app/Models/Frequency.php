@@ -8,4 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class Frequency extends Model
 {
     use HasFactory;
+
+    public function searches()
+    {
+        return $this->hasMany(Search::class);
+    }
 }
