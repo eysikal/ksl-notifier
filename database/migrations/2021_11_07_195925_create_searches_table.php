@@ -21,7 +21,7 @@ class CreateSearchesTable extends Migration
             $table->foreignIdFor(Frequency::class);
             $table->string('search_string', 50);
             $table->json('results')->nullable();
-            $table->timestamp('last_searched');
+            $table->timestamp('last_searched')->nullable();
             $table->unsignedTinyInteger('sleep_minutes');
             $table->timestamps();
         });
