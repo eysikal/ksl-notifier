@@ -22,6 +22,8 @@ class CreateSearchesTable extends Migration
             $table->string('search_string', 50);
             $table->json('results')->nullable();
             $table->timestamp('last_searched')->nullable();
+            $table->boolean('active')->default(false);
+            $table->enum('notification_type', ['email', 'sms', 'both']);
             $table->unsignedTinyInteger('sleep_minutes');
             $table->timestamps();
         });
