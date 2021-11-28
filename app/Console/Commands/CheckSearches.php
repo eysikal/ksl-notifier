@@ -46,6 +46,10 @@ class CheckSearches extends Command
             PerformSearch::dispatch($searchWithUserAndFrequency);
         });
 
+        if ($searchesWithUserAndFrequency->count() === 0) {
+            $this->info('No searches needed');
+        }
+
         return 0;
     }
 }
