@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\Search;
+use App\Notifications\NewResultsFound;
 use Goutte\Client;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -10,6 +11,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Carbon;
 
 class PerformSearch implements ShouldQueue
 {
@@ -36,42 +38,26 @@ class PerformSearch implements ShouldQueue
      */
     public function handle()
     {
-        // peform search
         $this->performSearch();
-
-        // calc new next_search based on frequency
-
-        // if new resuls, trrigger notification
     }
 
     private function performSearch()
     {
+        $searchUrl = self::KSL_SEARCH_URL . urlencode($this->searchWithUserAndFrequency->search_string);
         $this->client = new Client();
-        $crawler = $this->client->request('GET', self::KSL_SEARCH_URL . $this->searchWithUserAndFrequency->search_string);
+        $crawler = $this->client->request('GET', $searchUrl);
         $results = collect(
             $crawler->filter('.item-info-title-link a')->extract(['href'])
         );
 
         $resultsDiff = $results->diff($this->previousResults());
         if ($resultsDiff->count() > 0) {
-            // notify user
-            
-
-
-            // save new results
+            $this->notifyUser($searchUrl);
             $this->searchWithUserAndFrequency->results = json_encode($results);
-            $this->searchWithUserAndFrequency->save();
         }
-
-        // $newResults = array_diff($resultsList, $previousResultsList);
-        // if (count($newResults) > 0 && !$firstRun) {
-        //     echo "\n" . 'Found new results!' . "\n";
-        //     $newResultsString = "\n\n";
-        //     foreach ($newResults as $key => $result) {
-        //         $newResultsString .= '#' . ($key + 1) . ' https://classifieds.ksl.com' . $result . "\n\n";
-        //     }
-        //     $this->sendNotification($newResultsString);
-        // }
+        
+        $this->searchWithUserAndFrequency->next_search = $this->calcNextSearch();
+        $this->searchWithUserAndFrequency->save();
     }
 
     private function previousResults()
@@ -79,5 +65,18 @@ class PerformSearch implements ShouldQueue
         return collect(
             json_decode($this->searchWithUserAndFrequency->results)
         );
+    }
+
+    private function calcNextSearch()
+    {
+        $frequency = $this->searchWithUserAndFrequency->frequency;
+        $randomMinutes = rand($frequency->min, $frequency->max);
+
+        return Carbon::now()->addMinutes($randomMinutes);
+    }
+
+    private function notifyUser($searchUrl)
+    {
+        $this->searchWithUserAndFrequency->user->notify(new NewResultsFound($searchUrl));
     }
 }
