@@ -40,7 +40,8 @@ class CheckSearches extends Command
     public function handle()
     {
         $searchesWithUserAndFrequency = Search::with(['user', 'frequency'])
-            ->whereRaw('NOW() >= next_search');
+            ->whereRaw('next_search <= NOW()')
+            ->get();
 
         $searchesWithUserAndFrequency->each(function ($searchWithUserAndFrequency) {
             PerformSearch::dispatch($searchWithUserAndFrequency);
