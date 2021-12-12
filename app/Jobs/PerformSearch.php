@@ -12,6 +12,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 
 class PerformSearch implements ShouldQueue
 {
@@ -36,13 +37,15 @@ class PerformSearch implements ShouldQueue
      *
      * @return void
      */
-    public function handle()
+    public function handle(): string
     {
-        $this->performSearch();
+        return $this->performSearch();
     }
 
-    private function performSearch()
+    private function performSearch(): string
     {
+        $result = 'No new results.';
+
         $searchUrl = self::KSL_SEARCH_URL . urlencode($this->searchWithUserAndFrequency->search_string);
         $this->client = new Client();
         $crawler = $this->client->request('GET', $searchUrl);
@@ -54,20 +57,23 @@ class PerformSearch implements ShouldQueue
         if ($resultsDiff->count() > 0) {
             $this->notifyUser($searchUrl);
             $this->searchWithUserAndFrequency->results = json_encode($results);
+            $result = Carbon::now() . 'New results for "' . $this->searchWithUserAndFrequency->search_string . '"';
         }
         
         $this->searchWithUserAndFrequency->next_search = $this->calcNextSearch();
         $this->searchWithUserAndFrequency->save();
+
+        return $result;
     }
 
-    private function previousResults()
+    private function previousResults(): Collection
     {
         return collect(
             json_decode($this->searchWithUserAndFrequency->results)
         );
     }
 
-    private function calcNextSearch()
+    private function calcNextSearch(): string
     {
         $frequency = $this->searchWithUserAndFrequency->frequency;
         $randomMinutes = rand($frequency->min, $frequency->max);
@@ -75,7 +81,7 @@ class PerformSearch implements ShouldQueue
         return Carbon::now()->addMinutes($randomMinutes);
     }
 
-    private function notifyUser($searchUrl)
+    private function notifyUser(string $searchUrl): void
     {
         $this->searchWithUserAndFrequency->user->notify(new NewResultsFound($searchUrl));
     }
