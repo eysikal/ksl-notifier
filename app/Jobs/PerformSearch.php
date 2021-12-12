@@ -37,15 +37,13 @@ class PerformSearch implements ShouldQueue
      *
      * @return void
      */
-    public function handle(): string
+    public function handle(): void
     {
-        return $this->performSearch();
+        $this->performSearch();
     }
 
-    private function performSearch(): string
+    private function performSearch(): void
     {
-        $result = 'No new results.';
-
         $searchUrl = self::KSL_SEARCH_URL . urlencode($this->searchWithUserAndFrequency->search_string);
         $this->client = new Client();
         $crawler = $this->client->request('GET', $searchUrl);
@@ -57,13 +55,10 @@ class PerformSearch implements ShouldQueue
         if ($resultsDiff->count() > 0) {
             $this->notifyUser($searchUrl);
             $this->searchWithUserAndFrequency->results = json_encode($results);
-            $result = Carbon::now() . 'New results for "' . $this->searchWithUserAndFrequency->search_string . '"';
         }
         
         $this->searchWithUserAndFrequency->next_search = $this->calcNextSearch();
         $this->searchWithUserAndFrequency->save();
-
-        return $result;
     }
 
     private function previousResults(): Collection
