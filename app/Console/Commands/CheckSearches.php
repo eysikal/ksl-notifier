@@ -48,9 +48,11 @@ class CheckSearches extends Command
             PerformSearch::dispatch($searchWithUserAndFrequency);
         });
 
-        if ($searchesWithUserAndFrequency->count() === 0) {
-            $this->info('Searching - ' . Carbon::now());
+        $log = '.';
+        if ($searchesWithUserAndFrequency->count()) {
+            $log = 'Searching - ' . Carbon::now();
         }
+        $this->info($log);
 
         return 0;
     }
