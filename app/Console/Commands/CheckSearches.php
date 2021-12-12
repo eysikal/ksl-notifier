@@ -44,11 +44,11 @@ class CheckSearches extends Command
             ->get();
 
         $searchesWithUserAndFrequency->each(function ($searchWithUserAndFrequency) {
-            PerformSearch::dispatch($searchWithUserAndFrequency);
+            $this->info(PerformSearch::dispatch($searchWithUserAndFrequency));
         });
 
         if ($searchesWithUserAndFrequency->count() === 0) {
-            $this->info('No searches needed');
+            $this->info('.');
         }
 
         return 0;
