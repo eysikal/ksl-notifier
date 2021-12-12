@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Jobs\PerformSearch;
 use App\Models\Search;
 use Illuminate\Console\Command;
+use Illuminate\Support\Carbon;
 
 class CheckSearches extends Command
 {
@@ -44,11 +45,11 @@ class CheckSearches extends Command
             ->get();
 
         $searchesWithUserAndFrequency->each(function ($searchWithUserAndFrequency) {
-            $this->info(PerformSearch::dispatch($searchWithUserAndFrequency));
+            PerformSearch::dispatch($searchWithUserAndFrequency);
         });
 
         if ($searchesWithUserAndFrequency->count() === 0) {
-            $this->info('.');
+            $this->info('Searching - ' . Carbon::now());
         }
 
         return 0;
