@@ -12,15 +12,17 @@ class NewResultsFound extends Notification
     use Queueable;
 
 
-    private $searchUrl; 
+    private $searchUrl;
+    private $searchString;
 
     /**
      * Create a new notification instance.
      *
      * @return void
      */
-    public function __construct($searchUrl)
+    public function __construct(string $searchString, string $searchUrl)
     {
+        $this->searchString = $searchString;
         $this->searchUrl = $searchUrl;
     }
 
@@ -44,7 +46,8 @@ class NewResultsFound extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)
-                    ->line($this->searchUrl);
+            ->line("New results for \"$this->searchString\"")
+            ->action($this->searchUrl, $this->searchUrl);
     }
 
     /**

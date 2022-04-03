@@ -82,6 +82,11 @@ class PerformSearch implements ShouldQueue
 
     private function notifyUser(string $searchUrl): void
     {
-        $this->searchWithUserAndFrequency->user->notify(new NewResultsFound($searchUrl));
+        $this->searchWithUserAndFrequency->user->notify(
+            new NewResultsFound(
+                $this->searchWithUserAndFrequency->search_string,
+                $searchUrl
+            )
+        );
     }
 }
