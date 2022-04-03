@@ -18,7 +18,7 @@ class PerformSearch implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    const KSL_SEARCH_URL = 'https://classifieds.ksl.com/search/keyword/';
+    const KSL_SEARCH_URL = 'https://classifieds.ksl.com/search/keyword/%s/perPage/96';
     private $searchWithUserAndFrequency;
     private $client;
 
@@ -44,7 +44,11 @@ class PerformSearch implements ShouldQueue
 
     private function performSearch(): void
     {
-        $searchUrl = self::KSL_SEARCH_URL . urlencode($this->searchWithUserAndFrequency->search_string);
+        $searchUrl = sprintf(
+            self::KSL_SEARCH_URL,
+            urlencode($this->searchWithUserAndFrequency->search_string)
+        );
+
         $this->client = new Client();
         $crawler = $this->client->request('GET', $searchUrl);
         $results = collect(
