@@ -47,7 +47,7 @@ class NewResultsFound extends Notification
     {
         return (new MailMessage)
             ->line("New results for \"$this->searchString\"")
-            ->action($this->searchUrl, $this->searchUrl);
+            ->action('View Results', $this->searchUrl);
     }
 
     /**
